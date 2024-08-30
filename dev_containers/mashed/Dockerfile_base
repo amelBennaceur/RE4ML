@@ -1,0 +1,47 @@
+FROM carlasim/carla:0.9.14
+# Set environment variables for Miniconda installation
+ENV CONDA_DIR /opt/conda
+ENV PATH $CONDA_DIR/bin:$PATH
+USER root
+# create directory for logging and recording
+RUN mkdir -p /home/recording/logs
+RUN mkdir -p /home/recording/records
+
+# install required libraries, conda, and x11-apps for testing
+RUN apt-get update && apt-get install -y \
+    git \
+    wget \
+    vulkan-utils \
+    nano \
+    fonts-dejavu-core \
+    x11-apps && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/miniconda.sh && \
+    /bin/bash /tmp/miniconda.sh -b -p $CONDA_DIR && \
+    rm /tmp/miniconda.sh && \
+    conda clean -aiy && \
+    conda install -y python=3.8
+
+# Verify the installation
+RUN conda --version
+
+# Create a Conda environment from the environment.yml file
+COPY environment2.yml /tmp/environment.yml
+RUN conda env create -f /tmp/environment.yml
+
+ADD ./startup.sh /startup.sh
+RUN chmod +x /startup.sh
+
+# move carla to /opt to be scenic compatible
+RUN mv /home/carla /opt/carla
+# Copy the contents of your local Git repository into the container
+ADD ./scenic-repo /scenic-repo
+# change owner to user: carla
+RUN mkdir -p /home/carla/.cache && chown -R carla /home/carla/.cache
+RUN chown -R carla /scenic-repo /opt /home
+
+RUN conda run --name env1 python -m pip install -e /scenic-repo/Scenic-Sensors-Shenanigans-master/Scenic
+
+USER carla
+RUN chmod -R u+rwX /scenic-repo
