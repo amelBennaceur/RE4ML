@@ -1,5 +1,5 @@
 # RE4ML
-primary repo for all RE4ML experiments
+Repository with the demonstrators for Requirements Engineering For Machine Learning Systems
 
 # RE4ML Project Documentation
 
@@ -13,7 +13,6 @@ primary repo for all RE4ML experiments
   - [Running Experiments](#running-experiments)
   - [Running Mitigation](#running-mitigation)
   - [Notes on Running Scripts](#notes-on-running-scripts)
-  - [Troubleshooting](#troubleshooting)
 
 ## Introduction
 
@@ -22,11 +21,101 @@ This document provides instructions for setting up and running the RE4ML project
 ## Prerequisites
 
 Before you begin, ensure you have the following installed on your system:
-- Docker
-- Docker Compose
+- Ubuntu 20.04
+- Nvidia drivers for GPU
 - Git
 
-## System Setup
+## Setup Python Environment
+
+1. make sure `python 3.8` or higher is installed  
+   ```
+   $ python --version
+   ```
+2. make sure `pip` is installed
+   ```
+   $ pip --version
+   ```
+3. Install virtualenv 
+   ```
+   $ pip install virtualenv 
+   ``` 
+4. create virtual environment
+   ```
+   $ python3 -m virtualenv .venv
+   ```
+5. Activate the virtual environment
+   ```
+   $ source ~/.venv/bin/activate
+   ```
+6. Install `pygame` and `numpy`
+   ```
+   $ pip install numpy pygame
+   ```
+
+## Install CARLA simulator
+1. Go to [documentation](https://carla.readthedocs.io/en/latest/start_quickstart/) for carla simulator and follow package installation instructions
+
+2. click on the link to [carla repository](https://github.com/carla-simulator/carla/blob/master/Docs/download.md)
+
+3. click on the [link to 0.9.15](https://github.com/carla-simulator/carla/releases/tag/0.9.15/) version
+
+4. download tar.gz file for [carla](https://tiny.carla.org/carla-0-9-15-linux) 
+
+5. download the tar.gz file for [Additional Maps](https://tiny.carla.org/additional-maps-0-9-15-linux)
+
+6. open new terminal and go to the directory where the files are downloaded
+   ```
+   $ cd ~/Downloads
+   ``` 
+7. create a directory `/opt/carla` with `sudo` permission
+   ```
+   $ sudo mkdir /opt/carla
+   ```
+8. extract the `tar.gz` file for carla into `/opt/carla directory`
+   ```
+   $ sudo tar -xvzf CARLA_0.9.15.tar.gz -C /opt/carla
+   ```
+9. move the `tar.gz` file for additional maps to `/opt/carla/Import`
+   ```
+   $ sudo mv AdditionalMaps_0.9.15.tar.gz /opt/carla/Import/
+   ```
+10. change the directory into `/opt/carla/` and verify all the files are moved properly
+
+      ```
+      $ cd /opt/carla
+      $ ls
+      ```
+11. give execution permission for `ImportAssets.sh` file
+      ```
+      $ sudo chmod +x ImportAssets.sh
+      ```
+12. execute ImportAssets.sh file
+      ```
+      $ sudo sh ImportAssets.sh
+      ```
+13. Add execution permission to `CarlaUE4.sh`
+      ```
+      $ sudo chmod +x CarlaUE4.sh
+      ```
+14. Identify your user and group using 
+      ```
+      $ whoami
+      $ groups
+      ```
+15. change the ownership of everything inside `/opt/carla` to your user and group
+      ```
+      $ sudo chown -R <user>:<group> /opt/carla
+      ```
+16. finally execute `CarlaUE4.sh` and verify the installation works
+      ```
+      $ ./CarlaUE4.sh
+      ```
+17. Make sure `GPU` is utilized for rendering the simulations
+      ```
+      $ nvidia-smi
+      ```
+
+## Install Scenic
 
 1. Clone the repository:
    ```
@@ -39,27 +128,53 @@ Before you begin, ensure you have the following installed on your system:
    git checkout artefacts_deployable
    ```
 
-3. Run the system setup script:
+3. activate the virtual environment created earlier
    ```
-   chmod +x system_setup/prebuild.sh
-   sudo ./system_setup/prebuild.sh
+   $ source ~/.venv/bin/activate
    ```
+
+4. navigate to `artefacts/mashed_mod/scenic-repo/Scenic`
+   ```
+   $ cd artefacts/mashed_mod/scenic-repo/Scenic
+   ```
+
+5. update `apt-get`
+   ```
+   $ sudo update apt-get
+   ```
+
+6. install `python3-tk` 
+   ```
+   $ sudo apt-get install python3-tk
+   ```
+
+7. install `scenic` using pip as follows
+   ```
+   python -m pip install -e .
+   ```
+
+8. install `pythonAPI` for `carla` using pip
+   ```
+   $ pip install carla
+   ```
+
+9. install `ultralytics` package for using `YOLO` models
+   ```
+   $ pip install ultralytics
+   ```
+   
 ## Running the Project
-1. Build and start the Docker container using the `spinup.sh` script:
+1. Open a new terminal and run `carla server`
    ```
-   chmod +x spinup.sh
-   ./spinup.sh
-   ```
-
-Once the Docker container is built and running (after using `spinup.sh`), you can interact with the project using the `access.sh` script.
-
-2. Run the access script:
-   ```
-   ./access.sh
+   $ cd /opt/carla
+   $ ./CarlaUE4.sh -prefernvidia -RenderOffScreen
    ```
 
-This will open an interactive terminal inside the Docker container, where you can run experiments and simulations.
-
+2. Open a new terminal and run experiments
+   ```
+   $ cd re4ml/artefacts/mashed_mod
+   $ ./execute_experiments.sh -e <experiment> [options]
+   ```
 
 ## Running Experiments
 
@@ -126,14 +241,12 @@ Examples:
 
 ## Notes on Running Scripts
 
-1. Both scripts should be run from within the Docker container, which you can access using the `access.sh` script as described earlier.
-
-2. Make sure the scripts are executable. If they're not, you can make them executable using:
+1. Make sure the scripts are executable. If they're not, you can make them executable using:
    ```
    chmod +x execute_experiments.sh execute_mitigation.sh
    ```
 
-3. The scripts will run Scenic simulations based on the provided parameters. Ensure that all necessary Scenic files are present in the `scenic-repo/demonstrators/` directory within the container.
+2. The scripts will run Scenic simulations based on the provided parameters. Ensure that all necessary Scenic files are present in the `scenic-repo/demonstrators/` directory .
 
 4. For experiments, the script will automatically set the YOLO_MODEL environment variable based on the parameters you provide.
 
@@ -148,33 +261,3 @@ Examples:
    ```
 
 By using these scripts, you can easily run different experiments and mitigation strategies as part of the RE4ML project. The scripts provide a convenient way to set up the correct parameters and environment variables for each scenario.
-
-## Troubleshooting
-
-If you encounter any issues:
-
-1. Ensure all scripts (`spinup.sh`, `access.sh`, `startup.sh`, `execute_experiments.sh`, `execute_mitigation.sh`) are executable. If not, make them executable using `chmod +x <script_name>`.
-
-2. If you face permission issues, try running the scripts with `sudo`.
-
-3. For X11 forwarding issues (if the GUI doesn't appear), ensure you've run `xhost +local:*` on your host machine before starting the container.
-
-4. If the container fails to start or build, check the output of the `spinup.sh` script for any error messages.
-
-5. To check the status of the Docker container:
-   ```
-   docker ps
-   ```
-
-6. To view the logs of the container:
-   ```
-   docker logs c3
-   ```
-
-7. If you need to rebuild the container, you can use:
-   ```
-   ./spinup.sh
-   ```
-
-8. For any other issues, refer to the error messages in the terminal or check the project's GitHub issues page for known problems and solutions.
-

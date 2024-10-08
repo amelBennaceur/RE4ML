@@ -1,0 +1,60 @@
+FROM carlasim/carla:0.9.15
+
+ENV CONDA_DIR=/opt/conda
+ENV PATH=$CONDA_DIR/bin:$PATH
+ENV PYTHONUNBUFFERED=1
+ENV DEBIAN_FRONTEND=noninteractive
+
+USER root
+
+RUN rm -rf /var/lib/apt/lists/* && \
+    apt-get clean && \
+    apt-get update --fix-missing
+
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    git wget vulkan-utils nano fonts-dejavu-core x11-apps \
+    --no-install-recommends && \
+    rm -rf /var/lib/apt/lists/*
+
+# Create directories
+RUN mkdir -p /home/recording/logs /home/recording/records
+
+# Install Miniconda
+RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/miniconda.sh && \
+    /bin/bash /tmp/miniconda.sh -b -p $CONDA_DIR && \
+    rm /tmp/miniconda.sh && \
+    $CONDA_DIR/bin/conda clean -aiy && \
+    $CONDA_DIR/bin/conda install -y python=3.8 mamba -c conda-forge && \
+    $CONDA_DIR/bin/conda --version
+
+# Copy environment file
+COPY local_env.yml /tmp/environment.yml
+
+# Create a checksum of the environment file
+RUN md5sum /tmp/environment.yml > /tmp/environment_checksum.md5
+
+# Create the conda environment
+RUN $CONDA_DIR/bin/mamba env create -f /tmp/environment.yml && \
+    $CONDA_DIR/bin/conda clean -aiy
+
+# Add execution scripts
+COPY ./startup.sh /startup.sh
+COPY execute_experiments.sh /execute_experiments.sh
+COPY execute_mitigation.sh /execute_mitigation.sh
+
+# Make scripts executable
+RUN chmod +x /startup.sh /execute_experiments.sh /execute_mitigation.sh
+
+RUN mv /home/carla /opt/carla && \
+    mkdir -p /home/carla/.cache
+
+ADD ./scenic-repo /scenic-repo
+ADD ./model /model
+
+RUN chown -R carla /home/carla/.cache /scenic-repo /opt /home /model
+RUN $CONDA_DIR/bin/conda run --name env1 pip install -e /scenic-repo/Scenic
+
+USER carla
+RUN chmod -R u+rwX /scenic-repo
+
+CMD ["/bin/bash"]

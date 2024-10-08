@@ -1,0 +1,6 @@
+# Big stuff (models, log files, recordings, etc)
+yolov5s.pt
+carla_scratchpad/__pycache__
+carla_scratchpad/logging
+.vscode
+SaE/

@@ -1,0 +1,6 @@
+# Big stuff (models, log files, recordings, etc)
+Carla_BSP_scratchpad/split_set
+carla_scratchpad/__pycache__
+carla_scratchpad/logging
+.vscode
+SaE/
