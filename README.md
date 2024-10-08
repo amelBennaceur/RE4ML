@@ -22,6 +22,8 @@ This document provides instructions for setting up and running the RE4ML project
     Your browser does not support the video tag.
 </video>
 
+[Download or view the video](./artefacts/assets/doc.mp4)
+
 ## Prerequisites
 
 Before you begin, ensure you have the following installed on your system:
