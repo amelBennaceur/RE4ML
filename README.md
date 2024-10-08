@@ -18,9 +18,7 @@ Repository with the demonstrators for Requirements Engineering For Machine Learn
 
 This document provides instructions for setting up and running the RE4ML project. The project uses Docker to create a controlled environment for running experiments and simulations.
 
-<video src="./artefacts/assets/doc.mp4" controls="controls" style="max-width: 100%;">
-    Your browser does not support the video tag.
-</video>
+<iframe width="560" height="315" src="https://youtu.be/gYVZ4va7nTc" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 [Download or view the video](./artefacts/assets/doc.mp4)
 
