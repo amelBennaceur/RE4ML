@@ -123,13 +123,13 @@ Before you begin, ensure you have the following installed on your system:
 
 1. Clone the repository:
    ```
-   git clone https://github.com/pradeep5267/RE4ML.git
+   git clone https://github.com/amelBennaceur/RE4ML.git
    cd RE4ML
    ```
 
-2. Switch to the `artefacts_deployable` branch:
+2. Switch to the `main` branch:
    ```
-   git checkout artefacts_deployable
+   git checkout main
    ```
 
 3. activate the virtual environment created earlier
